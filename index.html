@@ -4,6 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Open Google Apps Script</title>
+  <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin: 10px 0;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
   <h1>Click below to open the Google Apps Script application:</h1>
@@ -14,6 +34,134 @@
 <a href="privacy-policy.html">
     <button>Privacy Policy</button>
   </a>
+
+  <div class="container">
+    <h1>Google OAuth Authorization</h1>
+    <button id="authBtn">Авторизоваться через Google</button>
+    <div class="button-container" id="buttonsContainer"></div>
+  </div>
+
+  <script>
+    // Настройка OAuth 2.0
+    const CLIENT_ID = 'YOUR_CLIENT_ID.apps.googleusercontent.com';  // Замените на ваш клиентский ID
+    const API_KEY = 'YOUR_API_KEY'; // Замените на ваш API ключ
+    const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest"];
+    const SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
+    
+    let accessToken = getCookie('accessToken');
+    let userLocale = getCookie('locale');
+
+    // Функция для записи куки
+    function setCookie(name, value) {
+      const date = new Date();
+      date.setFullYear(date.getFullYear() + 10); // Срок действия на 10 лет
+      const expires = "expires=" + date.toUTCString();
+      document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    }
+
+    // Функция для получения куки
+    function getCookie(name) {
+      const nameEQ = name + "=";
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') {
+          c = c.substring(1, c.length);
+        }
+        if (c.indexOf(nameEQ) === 0) {
+          return c.substring(nameEQ.length, c.length);
+        }
+      }
+      return null;
+    }
+
+    // Функция для загрузки клиентской библиотеки Google API
+    function loadClient() {
+      gapi.client.setApiKey(API_KEY);
+      return gapi.client.load(DISCOVERY_DOCS[0]);
+    }
+
+    // Инициализация клиента OAuth
+    function initAuth() {
+      gapi.auth2.init({
+        client_id: CLIENT_ID
+      }).then(() => {
+        const authInstance = gapi.auth2.getAuthInstance();
+        if (authInstance.isSignedIn.get()) {
+          onAuthSuccess(authInstance.currentUser.get());
+        } else {
+          document.getElementById('authBtn').addEventListener('click', () => {
+            authInstance.signIn().then(user => {
+              onAuthSuccess(user);
+            });
+          });
+        }
+      });
+    }
+
+    // Обработка успешной авторизации
+    function onAuthSuccess(user) {
+      accessToken = user.getAuthResponse().access_token;
+      setCookie('accessToken', accessToken);
+      const email = user.getBasicProfile().getEmail();
+      userLocale = 'en'; // Или считайте локализацию, например, из профиля Google
+      setCookie('locale', userLocale);
+
+      console.log("User authorized with email:", email);
+
+      // Загрузка данных из Google Sheets
+      loadClient().then(() => {
+        loadSheetData();
+      });
+    }
+
+    // Загрузка данных из Google Sheets
+    function loadSheetData() {
+      const spreadsheetId = 'YOUR_SPREADSHEET_ID';  // Замените на ID вашего листа
+      const range = 'Sheet1!A:B';  // Замените на ваш диапазон данных
+      gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: spreadsheetId,
+        range: range
+      }).then(response => {
+        const data = response.result.values;
+        console.log("Data from Google Sheets:", data);
+        displayButtonsBasedOnData(data);
+      });
+    }
+
+    // Создание кнопок в зависимости от данных из Google Sheets
+    function displayButtonsBasedOnData(data) {
+      const buttonsContainer = document.getElementById('buttonsContainer');
+      buttonsContainer.innerHTML = '';  // Очистить контейнер кнопок
+
+      data.forEach(row => {
+        const email = row[0];
+        const accessLevel = row[1];
+
+        // Если email совпадает с текущим, создаем кнопки на основе прав доступа
+        if (email === gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail()) {
+          let buttonHTML = '';
+          if (accessLevel === 'admin') {
+            buttonHTML = '<button class="button">Admin Action</button>';
+          } else if (accessLevel === 'user') {
+            buttonHTML = '<button class="button">User Action</button>';
+          }
+          buttonsContainer.innerHTML = buttonHTML;
+        }
+      });
+    }
+
+    // Загрузка библиотеки Google API
+    function start() {
+      gapi.load('client:auth2', initAuth);
+    }
+
+    window.onload = start;
+
+  </script>
+
+  <!-- Включаем клиентскую библиотеку Google API -->
+  <script async defer src="https://apis.google.com/js/api.js"></script>
 </body>
 </html>
 
