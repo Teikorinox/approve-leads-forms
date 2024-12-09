@@ -6,23 +6,53 @@
   <title>Open Google Apps Script</title>
   <style>
         body {
-            font-family: 'Arial', sans-serif;
-            padding: 20px;
-        }
-        button {
-            background-color: #007BFF;
-            color: white;
-            padding: 12px 24px;
-            font-size: 16px;
-            border: none;
-            cursor: pointer;
-            margin: 10px 0;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      text-align: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      background-color: white;
+      padding: 20px;
+      margin: 0 auto;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .button {
+      background-color: #007BFF;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      margin: 10px 0;
+      border-radius: 5px;
+      width: 100%;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+    .button:hover {
+      background-color: #0056b3;
+    }
+    .button:active {
+      transform: scale(0.98);
+    }
+    .button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
     </style>
 </head>
 <body>
@@ -31,137 +61,103 @@
     <button>Open App</button>
   </a>
 <br>
-<a href="privacy-policy.html">
-    <button>Privacy Policy</button>
-  </a>
 
   <div class="container">
-    <h1>Google OAuth Authorization</h1>
-    <button id="authBtn">Авторизоваться через Google</button>
-    <div class="button-container" id="buttonsContainer"></div>
+    <h1>Авторизация через Google</h1>
+    <div id="signinButton"></div>
+    <div id="emailDisplay"></div>
+    <div id="buttonContainer"></div> <!-- Для кнопок, которые появятся после авторизации -->
   </div>
 
+  <!-- Включение Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <script>
-    // Настройка OAuth 2.0
-    const CLIENT_ID = 'YOUR_CLIENT_ID.apps.googleusercontent.com';  // Замените на ваш клиентский ID
-    const API_KEY = 'YOUR_API_KEY'; // Замените на ваш API ключ
-    const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest"];
-    const SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
-    
-    let accessToken = getCookie('accessToken');
-    let userLocale = getCookie('locale');
+    // Функция для обработки успешной авторизации и получения email
+    function handleCredentialResponse(response) {
+      // В response будут данные о пользователе, включая его email
+      const email = response.credential;
+      console.log("Почта пользователя:", email);
 
-    // Функция для записи куки
-    function setCookie(name, value) {
-      const date = new Date();
-      date.setFullYear(date.getFullYear() + 10); // Срок действия на 10 лет
-      const expires = "expires=" + date.toUTCString();
-      document.cookie = name + "=" + value + ";" + expires + ";path=/";
+      // Сохраняем email в куки (срок действия 1 год)
+      document.cookie = "userEmail=" + email + "; path=/; max-age=31536000";  // куки на 1 год
+
+      // Показываем email на странице
+      document.getElementById("emailDisplay").innerText = "Авторизованный пользователь: " + email;
+
+      // Генерация кнопок в зависимости от email пользователя
+      generateButtons(email);
     }
 
-    // Функция для получения куки
-    function getCookie(name) {
-      const nameEQ = name + "=";
-      const ca = document.cookie.split(';');
-      for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') {
-          c = c.substring(1, c.length);
-        }
-        if (c.indexOf(nameEQ) === 0) {
-          return c.substring(nameEQ.length, c.length);
-        }
+    // Функция для генерации кнопок на основе прав доступа пользователя
+    function generateButtons(email) {
+      let buttons = [];
+
+      // Пример простого распределения прав на основе почты
+      if (email === "admin@example.com") {
+        buttons = [
+          { url: "https://example.com/form1", name: "Форма 1 (Админ)" },
+          { url: "https://example.com/form2", name: "Форма 2 (Админ)" }
+        ];
+      } else if (email === "user@example.com") {
+        buttons = [
+          { url: "https://example.com/form1", name: "Форма 1 (Пользователь)" }
+        ];
+      } else {
+        buttons = [
+          { url: "https://example.com/form1", name: "Форма 1" }
+        ];
       }
-      return null;
+
+      // Отображаем кнопки на странице
+      let buttonContainer = document.getElementById("buttonContainer");
+      buttonContainer.innerHTML = '';  // Очищаем контейнер перед добавлением новых кнопок
+
+      buttons.forEach(function(button) {
+        let div = document.createElement('div');
+        div.style.marginBottom = '10px';
+        let btn = document.createElement('button');
+        btn.textContent = button.name;  // Название кнопки из массива
+        btn.className = 'button';
+        btn.onclick = function() {
+          // Открытие новой страницы
+          window.open(button.url, '_blank');
+        };
+        div.appendChild(btn);
+        buttonContainer.appendChild(div);
+      });
     }
 
-    // Функция для загрузки клиентской библиотеки Google API
-    function loadClient() {
-      gapi.client.setApiKey(API_KEY);
-      return gapi.client.load(DISCOVERY_DOCS[0]);
-    }
+    // Функция для загрузки Google Identity Services и рендеринга кнопки для входа
+    window.onload = function() {
+      google.accounts.id.initialize({
+        client_id: 'YOUR_CLIENT_ID.apps.googleusercontent.com',  // Замените на ваш Client ID
+        callback: handleCredentialResponse
+      });
 
-    // Инициализация клиента OAuth
-    function initAuth() {
-      gapi.auth2.init({
-        client_id: CLIENT_ID
-      }).then(() => {
-        const authInstance = gapi.auth2.getAuthInstance();
-        if (authInstance.isSignedIn.get()) {
-          onAuthSuccess(authInstance.currentUser.get());
-        } else {
-          document.getElementById('authBtn').addEventListener('click', () => {
-            authInstance.signIn().then(user => {
-              onAuthSuccess(user);
-            });
-          });
+      google.accounts.id.renderButton(
+        document.getElementById("signinButton"), {
+          theme: "outline",
+          size: "large"
         }
-      });
+      );
+      
+      // Проверка наличия куки с email
+      const userEmail = getCookie("userEmail");
+      if (userEmail) {
+        document.getElementById("emailDisplay").innerText = "Авторизованный пользователь: " + userEmail;
+        generateButtons(userEmail); // Генерация кнопок на основе сохраненного email
+      }
     }
 
-    // Обработка успешной авторизации
-    function onAuthSuccess(user) {
-      accessToken = user.getAuthResponse().access_token;
-      setCookie('accessToken', accessToken);
-      const email = user.getBasicProfile().getEmail();
-      userLocale = 'en'; // Или считайте локализацию, например, из профиля Google
-      setCookie('locale', userLocale);
-
-      console.log("User authorized with email:", email);
-
-      // Загрузка данных из Google Sheets
-      loadClient().then(() => {
-        loadSheetData();
-      });
+    // Функция для получения значения куки по имени
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
     }
-
-    // Загрузка данных из Google Sheets
-    function loadSheetData() {
-      const spreadsheetId = 'YOUR_SPREADSHEET_ID';  // Замените на ID вашего листа
-      const range = 'Sheet1!A:B';  // Замените на ваш диапазон данных
-      gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: spreadsheetId,
-        range: range
-      }).then(response => {
-        const data = response.result.values;
-        console.log("Data from Google Sheets:", data);
-        displayButtonsBasedOnData(data);
-      });
-    }
-
-    // Создание кнопок в зависимости от данных из Google Sheets
-    function displayButtonsBasedOnData(data) {
-      const buttonsContainer = document.getElementById('buttonsContainer');
-      buttonsContainer.innerHTML = '';  // Очистить контейнер кнопок
-
-      data.forEach(row => {
-        const email = row[0];
-        const accessLevel = row[1];
-
-        // Если email совпадает с текущим, создаем кнопки на основе прав доступа
-        if (email === gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail()) {
-          let buttonHTML = '';
-          if (accessLevel === 'admin') {
-            buttonHTML = '<button class="button">Admin Action</button>';
-          } else if (accessLevel === 'user') {
-            buttonHTML = '<button class="button">User Action</button>';
-          }
-          buttonsContainer.innerHTML = buttonHTML;
-        }
-      });
-    }
-
-    // Загрузка библиотеки Google API
-    function start() {
-      gapi.load('client:auth2', initAuth);
-    }
-
-    window.onload = start;
-
   </script>
 
-  <!-- Включаем клиентскую библиотеку Google API -->
-  <script async defer src="https://apis.google.com/js/api.js"></script>
 </body>
 </html>
 
