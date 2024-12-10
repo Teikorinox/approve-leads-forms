@@ -10,17 +10,17 @@
       margin-bottom: 20px;
     }
     #google-signin-button {
-    display: none;
+    display: block; /* Ensures the button takes up its own line */
     padding: 10px 20px;
     background-color: #4285f4;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    width: auto; /* Ensure it takes only necessary width */
-    max-width: 400px; /* Optional: max width for better control */
-    margin: 0 auto; /* Center the button */
-    text-align: center; /* Align the text properly */
+    width: auto; /* Button width is determined by content */
+    max-width: 400px; /* Optional: set a max width for better control */
+    margin: 10px auto 0; /* Adds space above and centers the button */
+    text-align: center; /* Centers the text inside the button */
   }
     #user-rights {
       color: green;
