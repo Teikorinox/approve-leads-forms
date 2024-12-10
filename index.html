@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Google Auth</title>
+  <title>Approve Leads Forms</title>
   <style>
     #auth-status {
       font-size: 1.2em;
@@ -58,7 +58,6 @@
 <body style="overflow: hidden; height: 100vh; width: 100vw;">
   <div id="auth-status">Загрузка...</div>
   <div id="user-rights"></div>
-  <div id="matched-rights"></div>
   <button id="google-signin-button" onclick="redirectToGoogle()">Войти с Google</button>
 
   <div class="container" id="app-container" style="display:none;">
@@ -83,18 +82,16 @@
         const authStatus = document.getElementById('auth-status');
         const signInButton = document.getElementById('google-signin-button');
         const userRightsDiv = document.getElementById('user-rights');
-        const matchedRightsDiv = document.getElementById('matched-rights');
         const appContainer = document.getElementById('app-container');
 
         // Проверяем данные авторизации
         if (data.isAuthenticated) {
-          authStatus.innerText = `Вы вошли как: ${data.email}`;
+          authStatus.innerText = ``;
           signInButton.style.display = 'none';
           appContainer.style.display = 'block';
 
           // Отображаем права доступа, если они найдены
           if (data.rights) {
-            userRightsDiv.innerText = `Ваши права доступа: ${data.rights}`;
           } else {
             userRightsDiv.innerText = 'Ваши права доступа не найдены.';
           }
@@ -103,13 +100,11 @@
           if (data.matches && data.matches.length > 0) {
             generateButtons(data.matches, data.email);
           } else {
-            matchedRightsDiv.innerHTML = '<h3>Совпадений не найдено.</h3>';
           }
         } else {
           authStatus.innerText = 'Вы не авторизованы. Пожалуйста, войдите:';
           signInButton.style.display = 'block';
           appContainer.style.display = 'none';
-          matchedRightsDiv.innerHTML = ''; // Очистим совпадения
         }
       } catch (error) {
         console.error('Ошибка проверки авторизации:', error);
