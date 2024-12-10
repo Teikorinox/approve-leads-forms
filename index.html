@@ -6,8 +6,12 @@
   <title>Google Auth</title>
   <style>
     #auth-status {
-      font-size: 1.2em;
+      font-size: 1.5em;
       margin-bottom: 20px;
+      text-align: center;
+      font-weight: bold;
+      color: #4285f4;
+      margin-top: 20%;
     }
     #google-signin-button {
       display: none;
@@ -17,6 +21,8 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
     }
     #user-rights {
       color: green;
@@ -30,6 +36,7 @@
       border-radius: 10px;
       width: auto;
       box-sizing: border-box;
+      margin-top: 20px;
     }
     .button {
       background-color: #007BFF;
@@ -54,12 +61,14 @@
       cursor: not-allowed;
     }
   </style>
+  <!-- Добавление скриптов для Google Sign-In -->
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
 </head>
 <body style="overflow: hidden; height: 100vh; width: 100vw;">
   <div id="auth-status">Загрузка...</div>
-  <div id="user-rights"></div>
-  <div id="matched-rights"></div>
-  <button id="google-signin-button" onclick="redirectToGoogle()">Войти с Google</button>
+
+  <!-- Стандартная кнопка Google Sign-In -->
+  <div class="g-signin2" data-onsuccess="onSignIn"></div>
 
   <div class="container" id="app-container" style="display:none;">
     <h2>Доступные формы:</h2>
@@ -67,7 +76,21 @@
   </div>
 
   <script>
-    async function checkAuth() {
+    function onSignIn(googleUser) {
+      // Получаем данные пользователя
+      const profile = googleUser.getBasicProfile();
+      const email = profile.getEmail();
+      
+      // Скрываем кнопку и статус загрузки
+      document.getElementById('auth-status').style.display = 'none';
+      document.getElementById('google-signin-button').style.display = 'none';
+      document.getElementById('app-container').style.display = 'block';
+
+      // Отправляем запрос на сервер для проверки прав пользователя
+      checkAuth(email);
+    }
+
+    async function checkAuth(email) {
       try {
         // Отправляем запрос к серверу для проверки авторизации
         const response = await fetch('https://approveleads-forms-backend.onrender.com/check-auth', {
@@ -88,7 +111,7 @@
 
         // Проверяем данные авторизации
         if (data.isAuthenticated) {
-          authStatus.innerText = `Вы вошли как: ${data.email}`;
+          authStatus.innerText = `Вы вошли как: ${email}`;
           signInButton.style.display = 'none';
           appContainer.style.display = 'block';
 
@@ -101,7 +124,7 @@
 
           // Генерация кнопок для форм
           if (data.matches && data.matches.length > 0) {
-            generateButtons(data.matches, data.email);
+            generateButtons(data.matches, email);
           } else {
             matchedRightsDiv.innerHTML = '<h3>Совпадений не найдено.</h3>';
           }
@@ -157,13 +180,14 @@
       });
     }
 
-    function redirectToGoogle() {
-      // Редиректим на сервер для авторизации через Google
-      window.location.href = 'https://approveleads-forms-backend.onrender.com/auth/google';
+    // Функция для выхода из аккаунта Google
+    function signOut() {
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function () {
+        alert("Вы вышли из аккаунта.");
+      });
     }
-
-    // Проверяем статус авторизации при загрузке страницы
-    checkAuth();
   </script>
 </body>
 </html>
+
