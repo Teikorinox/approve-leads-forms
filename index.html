@@ -25,7 +25,7 @@
                 });
 
                 const data = await response.json();
-                
+
                 if (data.isAuthenticated) {
                     // Если пользователь авторизован, показываем его почту
                     document.getElementById('auth-status').innerText = `Вы авторизованы как: ${data.email}`;
