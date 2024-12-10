@@ -22,11 +22,21 @@
       color: green;
       font-weight: bold;
     }
+    #matched-rights {
+      margin-top: 20px;
+    }
+    .matched-item {
+      padding: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+      background-color: #f4f4f4;
+    }
   </style>
 </head>
 <body>
   <div id="auth-status">Загрузка...</div>
   <div id="user-rights"></div>
+  <div id="matched-rights"></div>
   <button id="google-signin-button" onclick="redirectToGoogle()">Войти с Google</button>
 
   <script>
@@ -46,6 +56,7 @@
         const authStatus = document.getElementById('auth-status');
         const signInButton = document.getElementById('google-signin-button');
         const userRightsDiv = document.getElementById('user-rights');
+        const matchedRightsDiv = document.getElementById('matched-rights');
 
         // Проверяем данные авторизации
         if (data.isAuthenticated) {
@@ -58,9 +69,26 @@
           } else {
             userRightsDiv.innerText = 'Ваши права доступа не найдены.';
           }
+
+          // Отображаем все совпадения прав (6 и 7 колонка)
+          if (data.matchedRights && data.matchedRights.length > 0) {
+            matchedRightsDiv.innerHTML = '<h3>Совпадения прав:</h3>';
+            data.matchedRights.forEach((match) => {
+              const matchedItem = document.createElement('div');
+              matchedItem.className = 'matched-item';
+              matchedItem.innerHTML = `
+                <strong>Колонка 6:</strong> ${match.valueFromColumn6}<br>
+                <strong>Колонка 7:</strong> ${match.valueFromColumn7}
+              `;
+              matchedRightsDiv.appendChild(matchedItem);
+            });
+          } else {
+            matchedRightsDiv.innerHTML = '<h3>Совпадений не найдено.</h3>';
+          }
         } else {
           authStatus.innerText = 'Вы не авторизованы. Пожалуйста, войдите:';
           signInButton.style.display = 'block';
+          matchedRightsDiv.innerHTML = ''; // Очистим совпадения
         }
       } catch (error) {
         console.error('Ошибка проверки авторизации:', error);
@@ -80,4 +108,5 @@
   </script>
 </body>
 </html>
+
 
