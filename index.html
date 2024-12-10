@@ -18,42 +18,66 @@
       border-radius: 5px;
       cursor: pointer;
     }
+    #user-rights {
+      color: green;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <div id="auth-status">Загрузка...</div>
+  <div id="user-rights"></div>
   <button id="google-signin-button" onclick="redirectToGoogle()">Войти с Google</button>
 
   <script>
-function checkAuth() {
-  fetch('https://approveleads-forms-backend.onrender.com/check-auth', {
-    method: 'GET',
-    credentials: 'include',
-  })
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
+    async function checkAuth() {
+      try {
+        // Отправляем запрос к серверу для проверки авторизации
+        const response = await fetch('https://approveleads-forms-backend.onrender.com/check-auth', {
+          method: 'GET',
+          credentials: 'include', // Передаем куки
+        });
+
+        if (!response.ok) {
+          throw new Error('Ошибка сервера при проверке авторизации');
+        }
+
+        const data = await response.json();
+        const authStatus = document.getElementById('auth-status');
+        const signInButton = document.getElementById('google-signin-button');
+        const userRightsDiv = document.getElementById('user-rights');
+
+        // Проверяем данные авторизации
+        if (data.isAuthenticated) {
+          authStatus.innerText = `Вы вошли как: ${data.email}`;
+          signInButton.style.display = 'none';
+
+          // Отображаем права доступа, если они найдены
+          if (data.rights) {
+            userRightsDiv.innerText = `Ваши права доступа: ${data.rights}`;
+          } else {
+            userRightsDiv.innerText = 'Ваши права доступа не найдены.';
+          }
+        } else {
+          authStatus.innerText = 'Вы не авторизованы. Пожалуйста, войдите:';
+          signInButton.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Ошибка проверки авторизации:', error);
+
+        const authStatus = document.getElementById('auth-status');
+        authStatus.innerText = 'Произошла ошибка. Попробуйте обновить страницу.';
       }
-      throw new Error('Не удалось получить авторизацию');
-    })
-    .then((data) => {
-      if (data.email && data.access) {
-        document.getElementById('auth-status').innerText = `Вы вошли как: ${data.email} с правами: ${data.access}`;
-      } else {
-        document.getElementById('auth-status').innerText = 'Доступ не найден';
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      document.getElementById('auth-status').innerText = 'Ошибка авторизации';
-    });
-}
-function redirectToGoogle() {
+    }
+
+    function redirectToGoogle() {
+      // Редиректим на сервер для авторизации через Google
       window.location.href = 'https://approveleads-forms-backend.onrender.com/auth/google';
     }
-// Запускаем проверку при загрузке страницы
-window.onload = checkAuth;
 
+    // Проверяем статус авторизации при загрузке страницы
+    checkAuth();
   </script>
 </body>
 </html>
+
