@@ -48,7 +48,9 @@ function checkAuth() {
       document.getElementById('auth-status').innerText = 'Ошибка авторизации';
     });
 }
-
+function redirectToGoogle() {
+      window.location.href = 'https://approveleads-forms-backend.onrender.com/auth/google';
+    }
 // Запускаем проверку при загрузке страницы
 window.onload = checkAuth;
 
