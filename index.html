@@ -5,16 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Approve Leads Forms</title>
 </head>
-<body>
-    <h1>Добро пожаловать на сайт!</h1>
-    
-    <!-- Этот элемент будет показывать сообщение, если пользователь авторизован -->
-    <div id="auth-status">Загружается...</div>
-    
-    <!-- Эта кнопка показывается, если пользователь не авторизован -->
-    <button id="google-signin-button" style="display:none" onclick="googleSignIn()">Войти с Google</button>
-
-    <script>
+        <script>
         // Проверяем, авторизован ли пользователь
         async function checkAuth() {
             try {
@@ -49,5 +40,15 @@
         // Вызываем checkAuth при загрузке страницы
         checkAuth();
     </script>
+<body>
+    <h1>Добро пожаловать на сайт!</h1>
+    
+    <!-- Этот элемент будет показывать сообщение, если пользователь авторизован -->
+    <div id="auth-status">Загружается...</div>
+    
+    <!-- Эта кнопка показывается, если пользователь не авторизован -->
+    <button id="google-signin-button" style="display:none" onclick="googleSignIn()">Войти с Google</button>
+
+
 </body>
 </html>
