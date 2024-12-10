@@ -77,8 +77,8 @@
               const matchedItem = document.createElement('div');
               matchedItem.className = 'matched-item';
               matchedItem.innerHTML = `
-                <strong>Колонка 6:</strong> ${match.valueFromColumn6}<br>
-                <strong>Колонка 7:</strong> ${match.valueFromColumn7}
+                <strong>Колонка 6:</strong> ${match[0]}<br>
+                <strong>Колонка 7:</strong> ${match[1]}
               `;
               matchedRightsDiv.appendChild(matchedItem);
             });
