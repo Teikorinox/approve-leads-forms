@@ -134,7 +134,7 @@
   </div>
   <div class="container" id="app-container" style="display:none;">
      <div id="user-email"></div>
-    <h2>Доступные формы:</h2>
+    <h2 id="container-label">Доступные формы:</h2>
     <div id="linkContainer"></div>
   </div>
 
@@ -158,6 +158,8 @@
         const appContainer = document.getElementById('app-container');
         const authContainer = document.getElementById('auth-container');
         const userMailDiv = document.getElementById('user-email');
+        const contLabel = document.getElementById('container-label');
+        
 
         // Проверяем данные авторизации
         if (data.isAuthenticated) {
@@ -170,6 +172,7 @@
           if (data.rights) {
           } else {
             userRightsDiv.innerText = 'Ваши права доступа не найдены.';
+            contLabel.innerText = 'Ваши права доступа не найдены.';
           }
 
           // Генерация кнопок для форм
