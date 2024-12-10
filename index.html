@@ -25,35 +25,33 @@
   <button id="google-signin-button" onclick="redirectToGoogle()">Войти с Google</button>
 
   <script>
-    async function checkAuth() {
-      try {
-        const response = await fetch('https://approveleads-forms-backend.onrender.com/check-auth', {
-          method: 'GET',
-          credentials: 'include', // Передаем куки
-        });
-
-        const data = await response.json();
-
-        const authStatus = document.getElementById('auth-status');
-        const signInButton = document.getElementById('google-signin-button');
-
-        if (data.isAuthenticated) {
-          authStatus.innerText = `Вы вошли как: ${data.email}`;
-          signInButton.style.display = 'none';
-        } else {
-          authStatus.innerText = 'Вы не авторизованы. Пожалуйста, войдите:';
-          signInButton.style.display = 'block';
-        }
-      } catch (error) {
-        console.error('Ошибка проверки авторизации:', error);
+function checkAuth() {
+  fetch('https://approveleads-forms-backend.onrender.com/check-auth', {
+    method: 'GET',
+    credentials: 'include',
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
       }
-    }
+      throw new Error('Не удалось получить авторизацию');
+    })
+    .then((data) => {
+      if (data.email && data.access) {
+        document.getElementById('auth-status').innerText = `Вы вошли как: ${data.email} с правами: ${data.access}`;
+      } else {
+        document.getElementById('auth-status').innerText = 'Доступ не найден';
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      document.getElementById('auth-status').innerText = 'Ошибка авторизации';
+    });
+}
 
-    function redirectToGoogle() {
-      window.location.href = 'https://approveleads-forms-backend.onrender.com/auth/google';
-    }
+// Запускаем проверку при загрузке страницы
+window.onload = checkAuth;
 
-    checkAuth();
   </script>
 </body>
 </html>
