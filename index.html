@@ -71,9 +71,9 @@
           }
 
           // Отображаем все совпадения прав (6 и 7 колонка)
-          if (data.matchedRights && data.matchedRights.length > 0) {
+          if (data.matches && data.matches.length > 0) {
             matchedRightsDiv.innerHTML = '<h3>Совпадения прав:</h3>';
-            data.matchedRights.forEach((match) => {
+            data.matches.forEach((match) => {
               const matchedItem = document.createElement('div');
               matchedItem.className = 'matched-item';
               matchedItem.innerHTML = `
