@@ -1,56 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Approve Leads Forms</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Auth</title>
+  <style>
+    #auth-status {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
+    #google-signin-button {
+      display: none;
+      padding: 10px 20px;
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
 </head>
-        <script>
-    // Проверяем, авторизован ли пользователь
-    async function checkAuth() {
-        try {
-            // Отправляем запрос на сервер для проверки авторизации
-            const response = await fetch('https://approveleads-forms-backend.onrender.com/check-auth', {
-                method: 'GET',
-                credentials: 'include' // Передаем куки для проверки
-            });
-
-            const data = await response.json();
-
-            if (data.isAuthenticated) {
-                // Если пользователь авторизован, показываем его почту
-                document.getElementById('auth-status').innerText = `Вы авторизованы как: ${data.email}`;
-                document.getElementById('google-signin-button').style.display = 'none'; // Скрываем кнопку
-            } else {
-                // Если не авторизован, показываем кнопку для входа
-                document.getElementById('auth-status').innerText = 'Пожалуйста, авторизуйтесь через Google';
-                document.getElementById('google-signin-button').style.display = 'block'; // Показываем кнопку
-            }
-        } catch (error) {
-            console.error('Ошибка при проверке авторизации:', error);
-            document.getElementById('auth-status').innerText = 'Произошла ошибка при проверке авторизации';
-        }
-    }
-
-    // Функция для перенаправления на авторизацию через Google
-    function googleSignIn() {
-        window.location.href = 'https://approveleads-forms-backend.onrender.com/auth/google';
-    }
-
-    // Вызываем checkAuth при загрузке страницы
-    checkAuth();
-</script>
-
 <body>
-    <h1>Добро пожаловать на сайт!</h1>
-    
-    <!-- Этот элемент будет показывать сообщение, если пользователь авторизован -->
-    <div id="auth-status">Загружается...</div>
-    
-    <!-- Эта кнопка показывается, если пользователь не авторизован -->
-    <button id="google-signin-button" style="display:none" onclick="googleSignIn()">Войти с Google</button>
-    <button id="goo" onclick="checkAuth()">Войти</button>
+  <div id="auth-status">Загрузка...</div>
+  <button id="google-signin-button" onclick="redirectToGoogle()">Войти с Google</button>
 
+  <script>
+    async function checkAuth() {
+      try {
+        const response = await fetch('https://approveleads-forms-backend.onrender.com/check-auth', {
+          method: 'GET',
+          credentials: 'include', // Передаем куки
+        });
 
+        const data = await response.json();
+
+        const authStatus = document.getElementById('auth-status');
+        const signInButton = document.getElementById('google-signin-button');
+
+        if (data.isAuthenticated) {
+          authStatus.innerText = `Вы вошли как: ${data.email}`;
+          signInButton.style.display = 'none';
+        } else {
+          authStatus.innerText = 'Вы не авторизованы. Пожалуйста, войдите:';
+          signInButton.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Ошибка проверки авторизации:', error);
+      }
+    }
+
+    function redirectToGoogle() {
+      window.location.href = 'https://approveleads-forms-backend.onrender.com/auth/google';
+    }
+
+    checkAuth();
+  </script>
 </body>
 </html>
