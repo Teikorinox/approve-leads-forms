@@ -57,8 +57,29 @@
 </head>
 <body>
 <body>
-  <h1>Google Sign-In</h1>
-  <button onclick="window.location.href = 'https://approveleads-forms-backend.onrender.com/auth/google';">Sign in with Google</button>
+  <div id="content">
+    <!-- Контент, который будет изменяться в зависимости от авторизации -->
+  </div>
+
+  <script>
+    // Проверка наличия куки
+    const checkAuth = async () => {
+      const response = await fetch('https://approveleads-forms-backend.onrender.com/check-auth', {
+        method: 'GET',
+        credentials: 'same-origin', // Чтобы отправлять куки на сервер
+      });
+
+      const data = await response.json();
+
+      if (data.isAuthenticated) {
+        document.getElementById('content').innerHTML = `Здравствуйте, ${data.email}!`;
+      } else {
+        document.getElementById('content').innerHTML = '<a href="/auth/google">Войти через Google</a>';
+      }
+    };
+
+    checkAuth();
+  </script>
 </body>
 
 
