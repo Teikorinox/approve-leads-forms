@@ -125,10 +125,12 @@
   </style>
 </head>
 <body style="overflow: hidden; height: 100vh; width: 100vw;">
+  <div class="container">
+    <div id="auth-status">Загрузка...</div>
+    <div id="user-rights"></div>
+    <button id="google-signin-button" onclick="redirectToGoogle()">Войти с Google</button>
+  </div>
   <div class="container" id="app-container" style="display:none;">
-  <div id="auth-status">Загрузка...</div>
-  <div id="user-rights"></div>
-  <button id="google-signin-button" onclick="redirectToGoogle()">Войти с Google</button>
      <div id="user-email"></div>
     <h2>Доступные формы:</h2>
     <div id="linkContainer"></div>
