@@ -1,7 +1,7 @@
 async function checkAuth() {
       try {
         // Запрос к серверу для проверки авторизации
-        const response = await fetch('${SERVER_URL}/check-auth', {
+        const response = await fetch('https://approveleads-forms-backend.onrender.com/check-auth', {
           method: 'GET',
           credentials: 'include', // Передаем куки
         });
@@ -91,6 +91,6 @@ async function checkAuth() {
     }
     function redirectToGoogle() {
       // Редиректим на сервер для авторизации через Google
-      window.location.href = '${SERVER_URL}/auth/google';
+      window.location.href = 'https://approveleads-forms-backend.onrender.com/auth/google';
     }
     checkAuth();
