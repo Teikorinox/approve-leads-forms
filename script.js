@@ -56,11 +56,12 @@ function generateButtons(matches, userEmail) {
         <html>
         <head>
           <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	      	<meta http-equiv="X-UA-Compatible" content="ie=edge">
           <title>${button.name}</title>
         </head>
         <body>
-          <iframe src="${button.url}" frameborder="0" style="width:100%; height:100%;"></iframe>
+          <iframe src="${button.url}" frameborder="0" style="overflow:hidden;overflow-x:hidden;overflow-y:hidden;height:100%;width:100%;position:absolute;top:0px;left:0px;right:0px;bottom:0px" height="100%" width="100%"> </iframe>
         </body>
         </html>`;
       newWindow.document.write(iframeContent);
